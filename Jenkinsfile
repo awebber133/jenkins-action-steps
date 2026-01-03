@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = "alexis441/jenkins-demo"
+        DOCKER_CREDS = credentials('dockerhub-creds')
     }
 
     stages {
@@ -14,18 +15,11 @@ pipeline {
 
         stage('Push Docker Image') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-creds',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
-                    sh '''
-                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                    docker push $DOCKER_IMAGE
-                    '''
-                }
+                sh '''
+                  echo "$DOCKER_CREDS_PSW" | docker login -u "$DOCKER_CREDS_USR" --password-stdin
+                  docker push $DOCKER_IMAGE
+                '''
             }
         }
     }
 }
-
