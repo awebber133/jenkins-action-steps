@@ -1,43 +1,22 @@
 pipeline {
     agent any
-
     environment {
-        DOCKER_IMAGE = "alexis441/jenkins-demo" // Change to your Docker Hub username/repo if needed
+        DOCKER_USER = 'alexis441'
+        DOCKER_PASS = 'your-docker-password'
     }
-
     stages {
-        stage('Checkout Code') {
-            steps {
-                // Checkout the repo
-                checkout scm
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $DOCKER_IMAGE .'
+                sh 'docker build -t alexis441/jenkins-demo .'
             }
         }
-
         stage('Push Docker Image') {
             steps {
-                // Use Jenkins stored credentials (Username + Password) with ID 'dockerhub-creds'
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh '''
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        docker push $DOCKER_IMAGE
-                    '''
-                }
+                sh '''
+                echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                docker push alexis441/jenkins-demo
+                '''
             }
-        }
-    }
-
-    post {
-        success {
-            echo "Docker image $DOCKER_IMAGE successfully built and pushed!"
-        }
-        failure {
-            echo "Something went wrong. Check console output for details."
         }
     }
 }
